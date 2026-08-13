@@ -274,6 +274,7 @@ button,input,select,textarea{max-width:100%;min-width:0}
 .insight-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.insight-card{min-width:0;padding:13px;border:1px solid var(--line);border-radius:17px;background:var(--surface2)}.insight-card.wide{grid-column:1/-1}.insight-card span{display:block;font-size:10px;color:var(--muted)}.insight-card strong{display:block;margin-top:4px;font-size:18px;letter-spacing:-.03em}.insight-card small{display:block;margin-top:5px;font-size:10px;color:var(--muted);line-height:1.5}.fatigue-by-time{display:grid;gap:8px;margin-top:12px}.fatigue-time-row{display:grid;grid-template-columns:72px minmax(0,1fr) 48px;gap:8px;align-items:center}.fatigue-time-row span{font-size:11px;color:var(--muted)}.fatigue-time-bar{height:9px;border-radius:999px;background:#eef2f7;overflow:hidden}.fatigue-time-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#f59e0b,#ef4444)}.fatigue-time-row strong{text-align:right;font-size:11px}.nap-analysis-list{display:grid;gap:8px;margin-top:12px}.nap-analysis-item{padding:10px 11px;border:1px solid var(--line);border-radius:14px;background:#fff}.nap-analysis-item strong{display:block;font-size:12px}.nap-analysis-item span{display:block;margin-top:3px;font-size:11px;color:var(--muted)}
 .wake-modal{position:fixed;z-index:90;inset:0;display:none;align-items:flex-end;justify-content:center;background:rgba(15,23,42,.45);padding:16px}.wake-modal.show{display:flex}.wake-panel{width:min(100%,520px);background:#fff;border-radius:24px;padding:18px;box-shadow:0 24px 60px rgba(15,23,42,.25)}.wake-panel h3{margin:0;font-size:18px}.wake-panel p{margin:5px 0 13px;color:var(--muted);font-size:12px}.wake-scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.wake-scale button{height:46px;border:1px solid var(--line);border-radius:13px;background:#fff;font-weight:850}.wake-scale button.active{background:var(--ink);color:#fff;border-color:var(--ink)}.wake-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.wake-actions button{height:44px;border-radius:13px;font-weight:800}.wake-save{border:0;background:var(--ink);color:#fff}.wake-skip{border:1px solid var(--line);background:#fff;color:var(--ink)}
 @media(max-width:390px){.insight-grid{grid-template-columns:minmax(0,1fr)}.insight-card.wide{grid-column:auto}.fatigue-time-row{grid-template-columns:64px minmax(0,1fr) 44px}}
+.modal-field{margin-top:12px}.modal-field label{display:block;margin-bottom:6px;font-size:12px;font-weight:750;color:var(--muted)}.modal-field input,.modal-field textarea,.modal-field select{display:block;width:100%;min-height:44px;border:1px solid var(--line);border-radius:13px;background:var(--surface2);padding:10px 11px;color:var(--ink);outline:none}.modal-field textarea{min-height:76px;resize:vertical}.activity-scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.activity-scale button{height:44px;border:1px solid var(--line);border-radius:13px;background:#fff;font-weight:850}.activity-scale button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
 
 
 /* 履歴一覧：10件ずつページ送り */
@@ -282,6 +283,19 @@ button,input,select,textarea{max-width:100%;min-width:0}
 .list-pagination button:last-child{justify-self:stretch}
 .list-pagination button:disabled{opacity:.35;cursor:default}
 .list-page-label{text-align:center;color:var(--muted);font-size:11px;white-space:nowrap}
+
+
+/* 月間・睡眠開始時間 */
+.sleep-start-card{padding:14px;overflow:hidden}
+.sleep-start-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:10px}
+.sleep-start-head strong{font-size:14px}.sleep-start-head span{font-size:11px;color:var(--muted);text-align:right}
+.sleep-start-chart-wrap{width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:15px;background:var(--surface2);scrollbar-width:none}.sleep-start-chart-wrap::-webkit-scrollbar{display:none}
+.sleep-start-chart{display:block;width:100%;min-width:620px;height:250px}
+.sleep-start-empty{padding:34px 14px;text-align:center;color:var(--muted);font-size:12px}
+.sleep-start-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:10px;color:var(--muted);font-size:10px}
+.sleep-start-legend span{display:inline-flex;align-items:center;gap:6px}.sleep-start-legend i{display:inline-block;width:18px;height:3px;border-radius:99px}
+.sleep-start-note{margin-top:9px;color:var(--muted);font-size:10px;line-height:1.5}
+@media(max-width:430px){.sleep-start-chart{height:220px}}
 
 </style>
 </head>
@@ -317,7 +331,7 @@ button,input,select,textarea{max-width:100%;min-width:0}
   <main id="viewRecord" class="view">
     <section class="section"><div class="section-title"><h2>手入力</h2><span>選択日に追加</span></div><div class="card">
       <details class="sheet"><summary>＋ 睡眠・昼寝を手入力 <span>⌄</span></summary><div class="sheet-body"><div class="two"><div class="field"><label>開始</label><input type="time" id="sleepManualStart"></div><div class="field"><label>終了</label><input type="time" id="sleepManualEnd"></div></div><div class="field"><label>種類</label><select id="sleepManualType"><option value="sleep">主睡眠（起床した日）</option><option value="nap">昼寝</option></select></div><p class="sleep-rule-note">主睡眠は「起床した日」、昼寝は「開始した日」の記録として保存されます。</p><button class="add" id="addSleepManual">睡眠記録を追加</button></div></details>
-      <details class="sheet"><summary>＋ 外出を手入力 <span>⌄</span></summary><div class="sheet-body"><div class="two"><div class="field"><label>家を出た</label><input type="time" id="outingStart"></div><div class="field"><label>家に着いた</label><input type="time" id="outingEnd"></div></div><button class="add" id="addOutingManual">外出記録を追加</button></div></details>
+      <details class="sheet"><summary>＋ 外出・活動を手入力 <span>⌄</span></summary><div class="sheet-body"><div class="two"><div class="field"><label>家を出た</label><input type="time" id="outingStart"></div><div class="field"><label>家に着いた</label><input type="time" id="outingEnd"></div></div><div class="field"><label>活動強度（1〜5）</label><select id="outingIntensity"><option value="">未記録</option><option value="1">1・ほぼ座っていた</option><option value="2">2・軽い活動</option><option value="3" selected>3・普通</option><option value="4">4・かなり活動</option><option value="5">5・非常に疲れる活動</option></select></div><div class="field"><label>活動メモ（任意）</label><input type="text" id="outingNote" placeholder="例：買い物、通院、散歩、仕事"></div><button class="add" id="addOutingManual">外出・活動記録を追加</button></div></details>
     </div></section>
 
     <section class="section" id="fatigueSection"><div class="section-title"><h2>疲労を記録</h2><span>10段階・時間ごと</span></div><div class="card"><div class="field" style="margin-top:0"><label>時刻</label><input type="time" id="fatigueTime"></div><div class="field"><label>疲れの強さ</label><div class="fatigue" id="fatigueScale"><button data-level="1">1</button><button data-level="2">2</button><button data-level="3">3</button><button data-level="4">4</button><button class="active" data-level="5">5</button><button data-level="6">6</button><button data-level="7">7</button><button data-level="8">8</button><button data-level="9">9</button><button data-level="10">10</button></div><div class="fatigue-labels"><span>ほぼ疲れていない</span><span>非常に疲れている</span></div></div><div class="field"><label>メモ（任意）</label><input type="text" id="fatigueNote" placeholder="例：集中しづらい、頭が重い"></div><button class="add" id="addFatigue">この時刻の疲労を記録</button></div></section>
@@ -331,6 +345,8 @@ button,input,select,textarea{max-width:100%;min-width:0}
 
     <section class="section"><div class="section-title"><h2>疲労と睡眠の推移</h2><span id="fatigueChartDayLabel">選択日</span></div><div class="fatigue-chart-wrap"><div class="fatigue-chart-nav"><button id="fatigueChartPrev" type="button" aria-label="前の日へ">‹</button><div class="fatigue-chart-date" id="fatigueChartDate"></div><button id="fatigueChartNext" type="button" aria-label="次の日へ">›</button></div><button id="fatigueChartReset" class="fatigue-chart-reset" type="button">選択日にリセット</button><div class="chart-legend"><span class="legend-item"><i class="legend-line"></i>疲労</span><span class="legend-item"><i class="legend-swatch legend-sleep"></i>主睡眠</span><span class="legend-item"><i class="legend-swatch legend-nap"></i>昼寝</span></div><div id="fatigueChart" class="fatigue-chart-swipe"></div><div class="chart-note">連続した時間軸を1本指で横に動かせます。2本指のピンチイン／ピンチアウトで横方向に拡大縮小できます。</div></div></section>
 
+    <section class="section"><div class="section-title"><h2>活動・睡眠・回復分析</h2><span>活動量 × 睡眠 × 翌朝疲労</span></div><div class="card"><div id="activitySleepRecovery"></div></div></section>
+
     <section class="section"><div class="section-title"><h2>睡眠と疲労の分析</h2><span>過去30日＋選択日</span></div><div class="card"><div id="sleepFatigueInsights"></div></div></section>
 
     <section class="section"><div class="section-title"><h2>疲労の記録</h2><span>時刻・疲労度・メモ</span></div><div class="card"><div class="fatigue-history" id="fatigueHistory"></div></div></section>
@@ -341,6 +357,7 @@ button,input,select,textarea{max-width:100%;min-width:0}
   <main id="viewCalendar" class="view">
     <section class="section"><div class="section-title"><h2>カレンダー</h2><span>月ごとの記録</span></div><div class="card calendar-card"><div class="month-nav"><button id="prevMonth">‹</button><strong id="monthLabel"></strong><button id="nextMonth">›</button></div><div class="week"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div><div class="calendar" id="calendarGrid"></div></div><div class="calendar-selected" id="calendarSelectedText"></div></section>
     <section class="section"><div class="section-title"><h2>月の日ごとの統計</h2><span>睡眠・疲労</span></div><div class="card month-stats-card"><div id="monthStats"></div></div></section>
+    <section class="section"><div class="section-title"><h2>睡眠開始時間</h2><span>何時に寝たか</span></div><div class="card sleep-start-card"><div id="sleepStartChart"></div></div></section>
   </main>
 
   <main id="viewSave" class="view">
@@ -361,9 +378,30 @@ button,input,select,textarea{max-width:100%;min-width:0}
 <div class="wake-modal" id="wakeFatigueModal" role="dialog" aria-modal="true" aria-labelledby="wakeFatigueTitle">
   <div class="wake-panel">
     <h3 id="wakeFatigueTitle">起床時の疲労は？</h3>
-    <p>起きた直後の感覚を1〜10で記録できます。疲労を記録しない場合は、そのまま「記録しない」を選べます。</p>
+    <p>起きた直後の感覚を1〜10で記録できます。メモも残せます。疲労を記録しない場合は、そのまま「記録しない」を選べます。</p>
     <div class="wake-scale" id="wakeFatigueScale"><button type="button" data-level="1" class="">1</button><button type="button" data-level="2" class="">2</button><button type="button" data-level="3" class="">3</button><button type="button" data-level="4" class="">4</button><button type="button" data-level="5" class="active">5</button><button type="button" data-level="6" class="">6</button><button type="button" data-level="7" class="">7</button><button type="button" data-level="8" class="">8</button><button type="button" data-level="9" class="">9</button><button type="button" data-level="10" class="">10</button></div>
+    <div class="modal-field"><label>起床時メモ（任意）</label><textarea id="wakeFatigueNote" placeholder="例：まだ眠い、頭が重い、すっきりした"></textarea></div>
     <div class="wake-actions"><button class="wake-skip" id="wakeFatigueSkip" type="button">記録しない</button><button class="wake-save" id="wakeFatigueSave" type="button">記録する</button></div>
+  </div>
+</div>
+
+<div class="wake-modal" id="bedFatigueModal" role="dialog" aria-modal="true" aria-labelledby="bedFatigueTitle">
+  <div class="wake-panel">
+    <h3 id="bedFatigueTitle">就寝時の疲労は？</h3>
+    <p>寝る直前の疲労を1〜10で記録できます。メモを残すこともできます。</p>
+    <div class="wake-scale" id="bedFatigueScale"><button type="button" data-level="1">1</button><button type="button" data-level="2">2</button><button type="button" data-level="3">3</button><button type="button" data-level="4">4</button><button type="button" data-level="5" class="active">5</button><button type="button" data-level="6">6</button><button type="button" data-level="7">7</button><button type="button" data-level="8">8</button><button type="button" data-level="9">9</button><button type="button" data-level="10">10</button></div>
+    <div class="modal-field"><label>就寝時メモ（任意）</label><textarea id="bedFatigueNote" placeholder="例：体が重い、目が疲れた、気分は落ち着いている"></textarea></div>
+    <div class="wake-actions"><button class="wake-skip" id="bedFatigueSkip" type="button">記録しないで寝る</button><button class="wake-save" id="bedFatigueSave" type="button">記録して寝る</button></div>
+  </div>
+</div>
+
+<div class="wake-modal" id="activityModal" role="dialog" aria-modal="true" aria-labelledby="activityTitle">
+  <div class="wake-panel">
+    <h3 id="activityTitle">今日の活動は？</h3>
+    <p>外出中の活動強度と、何をしたかを記録できます。</p>
+    <div class="modal-field"><label>活動強度（1〜5）</label><div class="activity-scale" id="activityScale"><button type="button" data-level="1">1</button><button type="button" data-level="2">2</button><button type="button" data-level="3" class="active">3</button><button type="button" data-level="4">4</button><button type="button" data-level="5">5</button></div></div>
+    <div class="modal-field"><label>活動メモ（任意）</label><textarea id="activityNote" placeholder="例：買い物で歩き回った、通院、友人と外出"></textarea></div>
+    <div class="wake-actions"><button class="wake-skip" id="activitySkip" type="button">強度なしで保存</button><button class="wake-save" id="activitySave" type="button">活動を保存</button></div>
   </div>
 </div>
 
@@ -387,7 +425,7 @@ function esc(s=''){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'
 function dateLabel(x){const d=new Date(x+'T12:00:00'),w='日月火水木金土'[d.getDay()];return [`${d.getMonth()+1}月${d.getDate()}日`,` ${w}曜日`+(x===todayISO()?' ・ 今日':'')]}
 function total(type,date=selectedDate){return dayData(date).sleep.filter(x=>x.type===type).reduce((n,x)=>n+mins(x.start,x.end),0)}
 function setRun(kind){if(db.running[kind])return stopRun(kind);if(selectedDate!==todayISO()){alert('過去日の記録は、下の「手入力」または疲労の時刻入力から追加してください。');return}db.running[kind]={date:selectedDate,time:nowHM()};save();render()}
-function stopRun(kind){const r=db.running[kind];if(!r)return;const end=nowHM();let wakeDate=null;if(kind==='outing'){dayData(r.date).outings.push({id:uid(),start:r.time,end})}else if(kind==='sleep'){wakeDate=todayISO();dayData(wakeDate).sleep.push({id:uid(),type:'sleep',start:r.time,end})}else{dayData(r.date).sleep.push({id:uid(),type:'nap',start:r.time,end})}delete db.running[kind];save();selectedDate=kind==='sleep'?todayISO():selectedDate;render();if(kind==='sleep')setTimeout(()=>openWakeFatigue(wakeDate,end),40)}
+function stopRun(kind){const r=db.running[kind];if(!r)return;const end=nowHM();let wakeDate=null,activityRef=null;if(kind==='outing'){const rec={id:uid(),start:r.time,end,intensity:null,note:''};dayData(r.date).outings.push(rec);activityRef={date:r.date,id:rec.id}}else if(kind==='sleep'){wakeDate=todayISO();dayData(wakeDate).sleep.push({id:uid(),type:'sleep',start:r.time,end})}else{dayData(r.date).sleep.push({id:uid(),type:'nap',start:r.time,end})}delete db.running[kind];save();selectedDate=kind==='sleep'?todayISO():selectedDate;render();if(kind==='sleep')setTimeout(()=>openWakeFatigue(wakeDate,end),40);if(kind==='outing'&&activityRef)setTimeout(()=>openActivityModal(activityRef.date,activityRef.id),40)}
 function remove(group,id){dayData()[group]=dayData()[group].filter(x=>x.id!==id);save();render()}
 function renderHeader(){const [a,b]=dateLabel(selectedDate);$('dateTitle').textContent=a;$('dateSub').textContent=b;const n=total('sleep'),p=total('nap');$('nightSleepTotal').textContent=fmt(n);$('napTotal').textContent=fmt(p);$('allSleepTotal').textContent=fmt(n+p);const memo=(dayData().memo||'').trim(),memoBtn=$('heroDayMemo');$('heroDayMemoText').textContent=memo||'メモなし';memoBtn.classList.toggle('empty',!memo);memoBtn.classList.remove('expanded');memoBtn.setAttribute('aria-expanded','false');$('heroDayMemoHint').textContent=memo?'タップして全文を表示':'';const isToday=selectedDate===todayISO();$('recordsHeading').textContent=isToday?'今日の詳細記録':`${a}の詳細記録`}
 function renderStatus(){let icon='☀️',title='記録待ち',sub='下のボタンから開始できます',pill='READY';if(db.running.sleep){icon='🌙';title='睡眠中';sub=`${db.running.sleep.time} から記録中`;pill='SLEEP'}else if(db.running.nap){icon='😴';title='昼寝中';sub=`${db.running.nap.time} から記録中`;pill='NAP'}else if(db.running.outing){icon='🚶';title='外出中';sub=`${db.running.outing.time} に家を出発`;pill='OUT'}$('statusIcon').textContent=icon;$('statusTitle').textContent=title;$('statusSub').textContent=sub;$('statusPill').textContent=pill;
@@ -741,7 +779,7 @@ function editRecordHtml(group,id){
     return `<div class="record editing" data-edit-g="sleep" data-edit-id="${esc(id)}"><div class="record-edit-head"><div class="record-edit-title"><div class="record-mark">${icon}</div>睡眠記録を編集</div></div><div class="record-edit-grid"><div class="record-edit-field"><label>開始</label><div class="record-edit-control"><input type="time" data-f="start" value="${esc(x.start)}"></div></div><div class="record-edit-field"><label>終了</label><div class="record-edit-control"><input type="time" data-f="end" value="${esc(x.end)}"></div></div><div class="record-edit-field full"><label>種類</label><div class="record-edit-control"><select data-f="type"><option value="sleep" ${x.type==='sleep'?'selected':''}>主睡眠</option><option value="nap" ${x.type==='nap'?'selected':''}>昼寝</option></select></div></div></div><div class="record-edit-buttons"><button class="record-edit-cancel" type="button">キャンセル</button><button class="record-edit-save" type="button">保存</button></div></div>`;
   }
   if(group==='outings'){
-    return `<div class="record editing" data-edit-g="outings" data-edit-id="${esc(id)}"><div class="record-edit-head"><div class="record-edit-title"><div class="record-mark">🚶</div>外出記録を編集</div></div><div class="record-edit-grid"><div class="record-edit-field"><label>家を出た</label><div class="record-edit-control"><input type="time" data-f="start" value="${esc(x.start)}"></div></div><div class="record-edit-field"><label>家に着いた</label><div class="record-edit-control"><input type="time" data-f="end" value="${esc(x.end)}"></div></div></div><div class="record-edit-buttons"><button class="record-edit-cancel" type="button">キャンセル</button><button class="record-edit-save" type="button">保存</button></div></div>`;
+    return `<div class="record editing" data-edit-g="outings" data-edit-id="${esc(id)}"><div class="record-edit-head"><div class="record-edit-title"><div class="record-mark">🚶</div>外出・活動記録を編集</div></div><div class="record-edit-grid"><div class="record-edit-field"><label>家を出た</label><div class="record-edit-control"><input type="time" data-f="start" value="${esc(x.start)}"></div></div><div class="record-edit-field"><label>家に着いた</label><div class="record-edit-control"><input type="time" data-f="end" value="${esc(x.end)}"></div></div><div class="record-edit-field"><label>活動強度（1〜5）</label><div class="record-edit-control"><select data-f="intensity"><option value="" ${x.intensity==null?'selected':''}>未記録</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(x.intensity)===n?'selected':''}>${n}</option>`).join('')}</select></div></div><div class="record-edit-field full"><label>活動メモ</label><div class="record-edit-control"><input type="text" data-f="note" value="${esc(x.note||'')}"></div></div></div><div class="record-edit-buttons"><button class="record-edit-cancel" type="button">キャンセル</button><button class="record-edit-save" type="button">保存</button></div></div>`;
   }
   const options=Array.from({length:10},(_,i)=>i+1).map(n=>`<option value="${n}" ${Number(x.level)===n?'selected':''}>${n}</option>`).join('');
   return `<div class="record editing" data-edit-g="fatigue" data-edit-id="${esc(id)}"><div class="record-edit-head"><div class="record-edit-title"><div class="record-mark">⚡️</div>疲労記録を編集</div></div><div class="record-edit-grid"><div class="record-edit-field"><label>時刻</label><div class="record-edit-control"><input type="time" data-f="time" value="${esc(x.time)}"></div></div><div class="record-edit-field"><label>疲労度</label><div class="record-edit-control"><select data-f="level">${options}</select></div></div><div class="record-edit-field full"><label>メモ</label><div class="record-edit-control"><input type="text" data-f="note" value="${esc(x.note||'')}" placeholder="メモなし"></div></div></div><div class="record-edit-buttons"><button class="record-edit-cancel" type="button">キャンセル</button><button class="record-edit-save" type="button">保存</button></div></div>`;
@@ -763,14 +801,14 @@ function saveRecordEdit(box){
     x.start=start;x.end=end;x.type=val('type')==='nap'?'nap':'sleep';
   }else if(group==='outings'){
     const start=val('start'),end=val('end');if(!start||!end)return alert('出発と到着時刻を入力してください');
-    x.start=start;x.end=end;
+    x.start=start;x.end=end;const iv=val('intensity');x.intensity=iv===''?null:Math.max(1,Math.min(5,Number(iv)||1));x.note=val('note').trim();
   }else{
     const time=val('time');if(!time)return alert('時刻を入力してください');
     x.time=time;x.level=Math.max(1,Math.min(10,Number(val('level'))||1));x.note=val('note').trim();
   }
   save();render();
 }
-function renderTimeline(){const d=dayData(),items=[];d.sleep.forEach(x=>items.push({t:x.start,icon:x.type==='nap'?'😴':'🌙',title:x.type==='nap'?'昼寝':'主睡眠',meta:`${x.start} → ${x.end} ・ ${fmt(mins(x.start,x.end))}`,g:'sleep',id:x.id}));d.outings.forEach(x=>items.push({t:x.start,icon:'🚶',title:'外出',meta:`${x.start} → ${x.end} ・ ${fmt(mins(x.start,x.end))}`,g:'outings',id:x.id}));d.fatigue.forEach(x=>items.push({t:x.time,icon:'⚡️',title:`疲労 ${x.level}/10`,meta:`${x.time}${x.note?' ・ '+esc(x.note):''}`,g:'fatigue',id:x.id}));items.sort((a,b)=>a.t.localeCompare(b.t));$('recordCount').textContent=`${items.length}件`;$('timeline').innerHTML=items.length?items.map(x=>`<div class="record" data-g="${x.g}" data-id="${esc(x.id)}"><div class="record-mark">${x.icon}</div><div class="record-main"><strong>${x.title}</strong><span>${x.meta}</span></div><div class="record-actions"><button class="edit-record" type="button" data-g="${x.g}" data-id="${esc(x.id)}">編集</button><button class="del" type="button" data-g="${x.g}" data-id="${esc(x.id)}">削除</button></div></div>`).join(''):'<div class="card empty">まだ記録はありません</div>';$('timeline').querySelectorAll('.edit-record').forEach(b=>b.onclick=()=>startRecordEdit(b.dataset.g,b.dataset.id));$('timeline').querySelectorAll('.del').forEach(b=>b.onclick=()=>remove(b.dataset.g,b.dataset.id))}
+function renderTimeline(){const d=dayData(),items=[];d.sleep.forEach(x=>items.push({t:x.start,icon:x.type==='nap'?'😴':'🌙',title:x.type==='nap'?'昼寝':'主睡眠',meta:`${x.start} → ${x.end} ・ ${fmt(mins(x.start,x.end))}`,g:'sleep',id:x.id}));d.outings.forEach(x=>items.push({t:x.start,icon:'🚶',title:'外出・活動',meta:`${x.start} → ${x.end} ・ ${fmt(mins(x.start,x.end))}${x.intensity!=null?' ・ 強度 '+x.intensity+'/5':''}${x.note?' ・ '+esc(x.note):''}`,g:'outings',id:x.id}));d.fatigue.forEach(x=>items.push({t:x.time,icon:'⚡️',title:`疲労 ${x.level}/10${x.source==='wake'?'・起床時':x.source==='bed'?'・就寝時':''}`,meta:`${x.time}${x.note?' ・ '+esc(x.note):''}`,g:'fatigue',id:x.id}));items.sort((a,b)=>a.t.localeCompare(b.t));$('recordCount').textContent=`${items.length}件`;$('timeline').innerHTML=items.length?items.map(x=>`<div class="record" data-g="${x.g}" data-id="${esc(x.id)}"><div class="record-mark">${x.icon}</div><div class="record-main"><strong>${x.title}</strong><span>${x.meta}</span></div><div class="record-actions"><button class="edit-record" type="button" data-g="${x.g}" data-id="${esc(x.id)}">編集</button><button class="del" type="button" data-g="${x.g}" data-id="${esc(x.id)}">削除</button></div></div>`).join(''):'<div class="card empty">まだ記録はありません</div>';$('timeline').querySelectorAll('.edit-record').forEach(b=>b.onclick=()=>startRecordEdit(b.dataset.g,b.dataset.id));$('timeline').querySelectorAll('.del').forEach(b=>b.onclick=()=>remove(b.dataset.g,b.dataset.id))}
 function renderCalendar(){const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();$('monthLabel').textContent=`${y}年 ${m+1}月`;const first=new Date(y,m,1),start=new Date(y,m,1-first.getDay());let h='';for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const x=iso(d),dd=db.days[x],has=dd&&(dd.sleep?.length||dd.outings?.length||dd.fatigue?.length||dd.memo);h+=`<button class="day ${d.getMonth()!==m?'muted':''} ${x===selectedDate?'selected':''} ${x===todayISO()?'today':''} ${has?'has':''}" data-date="${x}" aria-label="${x}">${d.getDate()}</button>`}$('calendarGrid').innerHTML=h;const [a,b]=dateLabel(selectedDate);$('calendarSelectedText').innerHTML=`選択中：<strong>${a}${b}</strong>`;$('calendarGrid').querySelectorAll('.day').forEach(b=>b.onclick=()=>{selectedDate=b.dataset.date;fatigueViewDate=selectedDate;calendarCursor=new Date(selectedDate+'T12:00:00');render();switchView('Calendar')})}
 function hmToMin(t){if(!t)return 0;const [h,m]=t.split(':').map(Number);return h*60+m}
 function dateAdd(date,n){const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+n);return iso(d)}
@@ -1025,15 +1063,86 @@ function renderMonthStats(){
 }
 
 
-let pendingWakeFatigue=null,wakeFatigueLevel=5;
-function openWakeFatigue(date,time){pendingWakeFatigue={date,time};wakeFatigueLevel=5;const modal=$('wakeFatigueModal');if(!modal)return;modal.classList.add('show');$('wakeFatigueScale').querySelectorAll('button').forEach(b=>b.classList.toggle('active',+b.dataset.level===5))}
+function renderSleepStartChart(){
+  const host=$('sleepStartChart');if(!host)return;
+  const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth(),days=new Date(y,m+1,0).getDate();
+  const rows=[];
+  for(let day=1;day<=days;day++){
+    const date=iso(new Date(y,m,day,12)),d=db.days[date]||{},sleeps=(d.sleep||[]).filter(x=>x.type==='sleep');
+    let main=null;
+    if(sleeps.length)main=[...sleeps].sort((a,b)=>mins(b.start,b.end)-mins(a.start,a.end))[0];
+    const wake=[...(d.fatigue||[])].filter(x=>x.source==='wake').sort((a,b)=>b.time.localeCompare(a.time))[0]||null;
+    let start=null,label=null;
+    if(main){const raw=hmToMin(main.start);start=raw<12*60?raw+1440:raw;label=main.start}
+    rows.push({day,date,start,label,wakeFatigue:wake?Number(wake.level):null,wakeTime:wake?wake.time:null});
+  }
+  const sleepRecorded=rows.filter(x=>x.start!=null),fatigueRecorded=rows.filter(x=>x.wakeFatigue!=null);
+  if(!sleepRecorded.length&&!fatigueRecorded.length){host.innerHTML=`<div class="sleep-start-head"><strong>${y}年${m+1}月</strong><span>就寝時刻・起床時疲労</span></div><div class="sleep-start-empty">この月はまだ主睡眠の開始時刻や起床時疲労の記録がありません。</div>`;return}
+  const W=Math.max(620,days*24),H=250,L=48,R=34,T=18,B=34,plotW=W-L-R,plotH=H-T-B;
+  const minV=18*60,maxV=30*60;
+  const x=i=>L+(i/(days-1||1))*plotW;
+  const yTime=v=>T+((Math.max(minV,Math.min(maxV,v))-minV)/(maxV-minV))*plotH;
+  const yFatigue=v=>T+((10-Math.max(1,Math.min(10,v)))/9)*plotH;
+  const fmtTick=v=>`${String((Math.floor(v/60)%24)).padStart(2,'0')}:00`;
+  let grid='',labels='';
+  [18*60,21*60,24*60,27*60,30*60].forEach(v=>{const yy=yTime(v);grid+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#e2e8f0" stroke-width="1"/><text x="${L-7}" y="${yy+3}" text-anchor="end" font-size="9" fill="#64748b">${fmtTick(v)}</text>`});
+  [1,5,10].forEach(v=>{const yy=yFatigue(v);grid+=`<text x="${W-R+7}" y="${yy+3}" text-anchor="start" font-size="9" fill="#64748b">${v}</text>`});
+  rows.forEach((r,i)=>{if(r.day===1||r.day===days||r.day%5===0)labels+=`<text x="${x(i)}" y="${H-10}" text-anchor="middle" font-size="9" fill="#64748b">${r.day}</text>`});
+  let sleepPath='',sleepOpen=false,fatiguePath='',fatigueOpen=false;
+  rows.forEach((r,i)=>{
+    if(r.start==null||r.start<minV||r.start>maxV)sleepOpen=false;
+    else{sleepPath+=`${sleepOpen?'L':'M'}${x(i).toFixed(1)},${yTime(r.start).toFixed(1)} `;sleepOpen=true}
+    if(r.wakeFatigue==null)fatigueOpen=false;
+    else{fatiguePath+=`${fatigueOpen?'L':'M'}${x(i).toFixed(1)},${yFatigue(r.wakeFatigue).toFixed(1)} `;fatigueOpen=true}
+  });
+  const sleepDots=rows.map((r,i)=>r.start!=null&&r.start>=minV&&r.start<=maxV?`<circle cx="${x(i)}" cy="${yTime(r.start)}" r="3" fill="#7c3aed"><title>${r.day}日 ${r.label} 就寝</title></circle>`:'').join('');
+  const fatigueDots=rows.map((r,i)=>r.wakeFatigue!=null?`<circle cx="${x(i)}" cy="${yFatigue(r.wakeFatigue)}" r="3" fill="#ef4444"><title>${r.day}日 起床時疲労 ${r.wakeFatigue}/10${r.wakeTime?'（'+r.wakeTime+'）':''}</title></circle>`:'').join('');
+  host.innerHTML=`
+    <div class="sleep-start-head"><strong>${y}年${m+1}月</strong><span>左：就寝時刻　右：起床時疲労</span></div>
+    <div class="sleep-start-chart-wrap"><svg class="sleep-start-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${y}年${m+1}月の日ごとの睡眠開始時間と起床時疲労の折れ線グラフ">${grid}${labels}<path d="${sleepPath.trim()}" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>${sleepDots}<path d="${fatiguePath.trim()}" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>${fatigueDots}</svg></div>
+    <div class="sleep-start-legend"><span><i style="background:#7c3aed"></i>睡眠開始時間</span><span><i style="background:#ef4444"></i>起床時疲労</span></div>
+    <div class="sleep-start-note">各日の主睡眠のうち最も長い記録の開始時刻と、その日の最後の起床時疲労を表示します。0:00〜6:00の就寝は前夜から連続して見えるよう24:00〜30:00として配置しています。</div>`;
+}
+
+let pendingWakeFatigue=null,wakeFatigueLevel=5,bedFatigueLevel=5,pendingActivity=null,activityLevel=3;
+function openWakeFatigue(date,time){pendingWakeFatigue={date,time};wakeFatigueLevel=5;const modal=$('wakeFatigueModal');if(!modal)return;$('wakeFatigueNote').value='';modal.classList.add('show');$('wakeFatigueScale').querySelectorAll('button').forEach(b=>b.classList.toggle('active',+b.dataset.level===5))}
 function closeWakeFatigue(){pendingWakeFatigue=null;const modal=$('wakeFatigueModal');if(modal)modal.classList.remove('show')}
+function openBedFatigue(){bedFatigueLevel=5;$('bedFatigueNote').value='';$('bedFatigueModal').classList.add('show');$('bedFatigueScale').querySelectorAll('button').forEach(b=>b.classList.toggle('active',+b.dataset.level===5))}
+function closeBedFatigue(){$('bedFatigueModal').classList.remove('show')}
+function beginSleepAfterBed(recordFatigue){const time=nowHM(),date=todayISO();if(recordFatigue)dayData(date).fatigue.push({id:uid(),time,level:bedFatigueLevel,note:$('bedFatigueNote').value.trim(),source:'bed'});save();closeBedFatigue();setRun('sleep')}
+function openActivityModal(date,id){pendingActivity={date,id};activityLevel=3;$('activityNote').value='';$('activityModal').classList.add('show');$('activityScale').querySelectorAll('button').forEach(b=>b.classList.toggle('active',+b.dataset.level===3))}
+function closeActivityModal(){pendingActivity=null;$('activityModal').classList.remove('show')}
+function saveActivityModal(withIntensity){if(!pendingActivity)return closeActivityModal();const {date,id}=pendingActivity,x=(dayData(date).outings||[]).find(r=>r.id===id);if(x){x.intensity=withIntensity?activityLevel:null;x.note=$('activityNote').value.trim()}save();closeActivityModal();render()}
 function dateTimeMs(date,hm,dayOffset=0){const d=new Date(date+'T00:00:00');d.setDate(d.getDate()+dayOffset);const [h,m]=hm.split(':').map(Number);d.setHours(h,m,0,0);return d.getTime()}
 function sleepIntervalsForRange(startMs,endMs){const out=[];Object.entries(db.days).forEach(([date,d])=>{(d.sleep||[]).forEach(x=>{let a=dateTimeMs(date,x.start),b=dateTimeMs(date,x.end);if(x.type==='sleep'&&b<a)a=dateTimeMs(date,x.start,-1);else if(x.type==='nap'&&b<a)b=dateTimeMs(date,x.end,1);if(b>a&&b>startMs&&a<endMs)out.push({start:a,end:b,type:x.type,date,raw:x})})});return out}
 function rolling24Sleep(date=selectedDate){let end;if(date===todayISO())end=Date.now();else end=new Date(date+'T00:00:00').getTime()+86400000;const start=end-86400000;return sleepIntervalsForRange(start,end).reduce((n,x)=>n+Math.max(0,Math.min(end,x.end)-Math.max(start,x.start)),0)/60000}
 function fatiguePointsRange(startMs,endMs){const out=[];Object.entries(db.days).forEach(([date,d])=>{(d.fatigue||[]).forEach(x=>{const ms=dateTimeMs(date,x.time);if(ms>=startMs&&ms<=endMs)out.push({...x,date,ms})})});return out.sort((a,b)=>a.ms-b.ms)}
 function analyzeNaps(days=30){const end=new Date(selectedDate+'T00:00:00').getTime()+86400000,start=end-days*86400000,pts=fatiguePointsRange(start-10800000,end+10800000),rows=[];sleepIntervalsForRange(start,end).filter(x=>x.type==='nap').forEach(n=>{const before=[...pts].filter(p=>p.ms<=n.start&&n.start-p.ms<=10800000).pop();const after=pts.find(p=>p.ms>=n.end&&p.ms-n.end<=10800000);if(before&&after)rows.push({date:n.date,start:n.raw.start,end:n.raw.end,mins:(n.end-n.start)/60000,before:before.level,after:after.level,delta:after.level-before.level})});return rows}
 function fatigueByTime(days=30){const end=new Date(selectedDate+'T00:00:00').getTime()+86400000,start=end-days*86400000,pts=fatiguePointsRange(start,end);const bins=[['0–6時',0,6],['6–10時',6,10],['10–14時',10,14],['14–18時',14,18],['18–22時',18,22],['22–24時',22,24]];return bins.map(([label,a,b])=>{const v=pts.filter(p=>{const h=+p.time.slice(0,2);return h>=a&&h<b}).map(p=>+p.level);return {label,avg:v.length?v.reduce((n,x)=>n+x,0)/v.length:null,count:v.length}})}
+function recoveryRows(days=60){
+  const rows=[];
+  for(let i=0;i<days;i++){
+    const date=dateAdd(selectedDate,-i),d=db.days[date]||{},prev=db.days[dateAdd(date,-1)]||{};
+    const wake=[...(d.fatigue||[])].filter(x=>x.source==='wake').sort((a,b)=>b.time.localeCompare(a.time))[0];
+    const bed=[...(d.fatigue||[])].filter(x=>x.source==='bed').sort((a,b)=>b.time.localeCompare(a.time))[0];
+    const sleepM=(d.sleep||[]).filter(x=>x.type==='sleep').reduce((n,x)=>n+mins(x.start,x.end),0);
+    const acts=(prev.outings||[]).filter(x=>x.intensity!=null);
+    const activityLoad=acts.reduce((n,x)=>n+(mins(x.start,x.end)/60)*Number(x.intensity),0);
+    if(wake&&sleepM>0)rows.push({date,sleepH:sleepM/60,wake:Number(wake.level),bed:bed?Number(bed.level):null,recovery:bed?Number(wake.level)-Number(bed.level):null,activityLoad,activityCount:acts.length});
+  }
+  return rows;
+}
+function renderActivitySleepRecovery(){
+  const host=$('activitySleepRecovery');if(!host)return;const rows=recoveryRows(60),paired=rows.filter(x=>x.activityCount>0),withRecovery=rows.filter(x=>x.recovery!=null);
+  const sleepBins=[[0,6,'6時間未満'],[6,7,'6〜7時間'],[7,8,'7〜8時間'],[8,9,'8〜9時間'],[9,24,'9時間以上']].map(([a,b,label])=>{const r=rows.filter(x=>x.sleepH>=a&&x.sleepH<b);return {label,count:r.length,avg:r.length?r.reduce((n,x)=>n+x.wake,0)/r.length:null}}).filter(x=>x.count);
+  const best=sleepBins.filter(x=>x.count>=2).sort((a,b)=>a.avg-b.avg)[0];
+  const avgLoad=paired.length?paired.reduce((n,x)=>n+x.activityLoad,0)/paired.length:null;
+  const high=avgLoad==null?[]:paired.filter(x=>x.activityLoad>=avgLoad),low=avgLoad==null?[]:paired.filter(x=>x.activityLoad<avgLoad);
+  const avg=(a,k)=>a.length?a.reduce((n,x)=>n+x[k],0)/a.length:null;
+  const highWake=avg(high,'wake'),lowWake=avg(low,'wake'),highSleep=avg(high,'sleepH'),lowSleep=avg(low,'sleepH');
+  const recoveryAvg=withRecovery.length?withRecovery.reduce((n,x)=>n+x.recovery,0)/withRecovery.length:null;
+  host.innerHTML=`<div class="insight-grid"><div class="insight-card wide"><span>④ 活動量 × 睡眠 → 翌朝疲労</span><strong>${paired.length>=4?(highWake!=null&&lowWake!=null?`高活動 ${highWake.toFixed(1)} / 低活動 ${lowWake.toFixed(1)}`:'データ不足'):'データ不足'}</strong><small>${paired.length>=4?`活動量は「活動時間 × 強度」。高活動日の平均睡眠 ${highSleep.toFixed(1)}時間、低活動日 ${lowSleep.toFixed(1)}時間。対象 ${paired.length}日`:`活動強度つきの外出と、その後の主睡眠・起床時疲労が4日以上たまると比較します。現在 ${paired.length}日`}</small></div><div class="insight-card"><span>⑤ 回復しやすい睡眠時間</span><strong>${best?best.label:'データ不足'}</strong><small>${best?`この範囲の翌朝疲労が平均 ${best.avg.toFixed(1)}/10（${best.count}日）`:'同じ睡眠時間帯の記録が2日以上必要です'}</small></div><div class="insight-card"><span>就寝→起床の平均回復</span><strong>${recoveryAvg==null?'—':`${recoveryAvg>0?'+':''}${recoveryAvg.toFixed(1)} /10`}</strong><small>${withRecovery.length?`起床時 − 就寝時。マイナスほど疲労が減少 ・ ${withRecovery.length}日`:'就寝時と起床時の両方を記録すると表示します'}</small></div><div class="insight-card wide"><span>睡眠時間帯ごとの翌朝疲労</span><div class="nap-analysis-list">${sleepBins.length?sleepBins.map(x=>`<div class="nap-analysis-item"><strong>${x.label}</strong><span>翌朝疲労 平均 ${x.avg.toFixed(1)}/10 ・ ${x.count}日</span></div>`).join(''):'<div class="fatigue-history-empty">主睡眠と起床時疲労を記録すると、ここに比較が表示されます。</div>'}</div></div></div>`;
+}
 function renderSleepFatigueInsights(){const host=$('sleepFatigueInsights');if(!host)return;const d=dayData(),wake=[...(d.fatigue||[])].filter(x=>x.source==='wake').sort((a,b)=>b.time.localeCompare(a.time))[0],rolling=rolling24Sleep(),naps=analyzeNaps(30),avgDelta=naps.length?naps.reduce((n,x)=>n+x.delta,0)/naps.length:null,bins=fatigueByTime(30),peak=bins.filter(x=>x.avg!=null).sort((a,b)=>b.avg-a.avg)[0];const deltaText=avgDelta==null?'データ不足':`${avgDelta>0?'+':''}${avgDelta.toFixed(1)}`;const deltaSub=avgDelta==null?'昼寝の前後3時間以内に疲労を記録すると分析できます':avgDelta<0?'昼寝後に疲労が下がる傾向':'昼寝後の疲労変化（マイナスほど改善）';host.innerHTML=`<div class="insight-grid"><div class="insight-card"><span>直近24時間の総睡眠</span><strong>${fmt(rolling)}</strong><small>主睡眠＋昼寝を24時間窓で集計</small></div><div class="insight-card"><span>選択日の起床時疲労</span><strong>${wake?wake.level+'/10':'—'}</strong><small>${wake?wake.time+' に記録':'起床操作の直後に記録できます'}</small></div><div class="insight-card"><span>昼寝前後の平均変化</span><strong>${deltaText}${avgDelta==null?'':' /10'}</strong><small>${deltaSub} ・ ${naps.length}件</small></div><div class="insight-card"><span>疲れやすい時間帯</span><strong>${peak?peak.label:'—'}</strong><small>${peak?'平均 '+peak.avg.toFixed(1)+'/10（'+peak.count+'件）':'疲労記録が増えると表示します'}</small></div><div class="insight-card wide"><span>時間帯別の平均疲労（過去30日）</span><div class="fatigue-by-time">${bins.map(x=>`<div class="fatigue-time-row"><span>${x.label}</span><div class="fatigue-time-bar"><i style="width:${x.avg==null?0:x.avg*10}%"></i></div><strong>${x.avg==null?'—':x.avg.toFixed(1)}</strong></div>`).join('')}</div></div><div class="insight-card wide"><span>最近の昼寝と疲労変化</span><div class="nap-analysis-list">${naps.length?naps.slice(-5).reverse().map(x=>`<div class="nap-analysis-item"><strong>${x.date.slice(5).replace('-','/')} ${x.start}〜${x.end} ・ ${Math.round(x.mins)}分</strong><span>疲労 ${x.before}/10 → ${x.after}/10　${x.delta>0?'+':''}${x.delta} ${x.delta<0?'（改善）':x.delta>0?'（上昇）':'（変化なし）'}</span></div>`).join(''):'<div class="fatigue-history-empty">昼寝の前後に疲労を記録すると、ここに変化が表示されます。</div>'}</div></div></div>`}
 
 function renderStats(){let h='';for(let i=6;i>=0;i--){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-i);const x=iso(d),dd=db.days[x]||{sleep:[]},m=(dd.sleep||[]).reduce((n,s)=>n+mins(s.start,s.end),0),pct=Math.min(100,m/600*100);h+=`<div class="stat-row"><div class="stat-day">${d.getMonth()+1}/${d.getDate()}</div><div class="bar"><span style="width:${pct}%"></span></div><div class="stat-value">${fmt(m)}</div></div>`}$('weekStats').innerHTML=h}
@@ -1043,7 +1152,7 @@ function renderFatigueHistory(){
   if(!rows.length){fatigueHistoryPage=0;host.innerHTML='<div class="fatigue-history-empty">この日の疲労記録はまだありません。<br>疲労を記録すると、メモもここで見返せます。</div>';return}
   const pages=Math.ceil(rows.length/HISTORY_PAGE_SIZE);fatigueHistoryPage=Math.max(0,Math.min(pages-1,fatigueHistoryPage));
   const start=fatigueHistoryPage*HISTORY_PAGE_SIZE,shown=rows.slice(start,start+HISTORY_PAGE_SIZE);
-  host.innerHTML=shown.map(x=>`<div class="fatigue-history-item"><div class="fatigue-history-level">${x.level}/10</div><div class="fatigue-history-main"><strong>${esc(x.time)}${x.source==='wake'?' ・ 起床時':''}</strong><span>${x.note?esc(x.note):'メモなし'}</span></div><button class="del" data-id="${x.id}">削除</button></div>`).join('')+(pages>1?`<div class="list-pagination"><button type="button" data-page="prev" ${fatigueHistoryPage===0?'disabled':''}>‹ 前へ</button><span class="list-page-label">${fatigueHistoryPage+1} / ${pages}ページ<br>${start+1}〜${Math.min(start+HISTORY_PAGE_SIZE,rows.length)} / ${rows.length}件</span><button type="button" data-page="next" ${fatigueHistoryPage===pages-1?'disabled':''}>次へ ›</button></div>`:'');
+  host.innerHTML=shown.map(x=>`<div class="fatigue-history-item"><div class="fatigue-history-level">${x.level}/10</div><div class="fatigue-history-main"><strong>${esc(x.time)}${x.source==='wake'?' ・ 起床時':x.source==='bed'?' ・ 就寝時':''}</strong><span>${x.note?esc(x.note):'メモなし'}</span></div><button class="del" data-id="${x.id}">削除</button></div>`).join('')+(pages>1?`<div class="list-pagination"><button type="button" data-page="prev" ${fatigueHistoryPage===0?'disabled':''}>‹ 前へ</button><span class="list-page-label">${fatigueHistoryPage+1} / ${pages}ページ<br>${start+1}〜${Math.min(start+HISTORY_PAGE_SIZE,rows.length)} / ${rows.length}件</span><button type="button" data-page="next" ${fatigueHistoryPage===pages-1?'disabled':''}>次へ ›</button></div>`:'');
   host.querySelectorAll('.del').forEach(b=>b.onclick=()=>remove('fatigue',b.dataset.id));
   host.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{fatigueHistoryPage+=b.dataset.page==='next'?1:-1;renderFatigueHistory();host.scrollIntoView({block:'start'})});
 }
@@ -1057,7 +1166,7 @@ function renderMemoHistory(){
   host.querySelectorAll('.memo-list-item').forEach(b=>b.onclick=()=>{selectedDate=b.dataset.date;fatigueViewDate=selectedDate;calendarCursor=new Date(selectedDate+'T12:00:00');render();switchView('Today');setTimeout(()=>$('dailyMemo').scrollIntoView({behavior:'smooth',block:'center'}),80)});
   host.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{memoHistoryPage+=b.dataset.page==='next'?1:-1;renderMemoHistory();host.scrollIntoView({block:'start'})});
 }
-function render(){renderHeader();renderStatus();renderDayOverview();renderTimeline();renderMemo();renderMemoHistory();renderCalendar();renderMonthStats();renderFatigueChart();renderFatigueHistory();renderSleepFatigueInsights();renderStats()}
+function render(){renderHeader();renderStatus();renderDayOverview();renderTimeline();renderMemo();renderMemoHistory();renderCalendar();renderMonthStats();renderSleepStartChart();renderFatigueChart();renderFatigueHistory();renderActivitySleepRecovery();renderSleepFatigueInsights();renderStats()}
 function shiftDay(n){const d=new Date(selectedDate+'T12:00:00');d.setDate(d.getDate()+n);selectedDate=iso(d);fatigueViewDate=selectedDate;dayViewStart=0;dayViewHours=24;calendarCursor=new Date(selectedDate+'T12:00:00');render()}
 function switchView(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
@@ -1088,14 +1197,18 @@ function switchView(v){
 
 $('wakeFatigueScale').querySelectorAll('button').forEach(b=>b.onclick=()=>{wakeFatigueLevel=+b.dataset.level;$('wakeFatigueScale').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b))});
 $('wakeFatigueSkip').onclick=()=>closeWakeFatigue();
-$('wakeFatigueSave').onclick=()=>{if(!pendingWakeFatigue)return closeWakeFatigue();const {date,time}=pendingWakeFatigue;dayData(date).fatigue.push({id:uid(),time,level:wakeFatigueLevel,note:'起床時',source:'wake'});save();closeWakeFatigue();render()};
-$('sleepAction').onclick=()=>setRun('sleep');$('napAction').onclick=()=>setRun('nap');$('homeAction').onclick=()=>setRun('outing');$('fatigueNow').onclick=()=>{if(selectedDate===todayISO())$('fatigueTime').value=nowHM();switchView('Record');setTimeout(()=>$('fatigueSection').scrollIntoView({behavior:'smooth',block:'start'}),80)};
+$('wakeFatigueSave').onclick=()=>{if(!pendingWakeFatigue)return closeWakeFatigue();const {date,time}=pendingWakeFatigue;dayData(date).fatigue.push({id:uid(),time,level:wakeFatigueLevel,note:$('wakeFatigueNote').value.trim(),source:'wake'});save();closeWakeFatigue();render()};
+$('bedFatigueScale').querySelectorAll('button').forEach(b=>b.onclick=()=>{bedFatigueLevel=+b.dataset.level;$('bedFatigueScale').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b))});
+$('bedFatigueSkip').onclick=()=>beginSleepAfterBed(false);$('bedFatigueSave').onclick=()=>beginSleepAfterBed(true);
+$('activityScale').querySelectorAll('button').forEach(b=>b.onclick=()=>{activityLevel=+b.dataset.level;$('activityScale').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b))});
+$('activitySkip').onclick=()=>saveActivityModal(false);$('activitySave').onclick=()=>saveActivityModal(true);
+$('sleepAction').onclick=()=>{if(db.running.sleep)setRun('sleep');else{if(selectedDate!==todayISO())return setRun('sleep');openBedFatigue()}};$('napAction').onclick=()=>setRun('nap');$('homeAction').onclick=()=>setRun('outing');$('fatigueNow').onclick=()=>{if(selectedDate===todayISO())$('fatigueTime').value=nowHM();switchView('Record');setTimeout(()=>$('fatigueSection').scrollIntoView({behavior:'smooth',block:'start'}),80)};
 $('addSleepManual').onclick=()=>{const a=$('sleepManualStart').value,b=$('sleepManualEnd').value;if(!a||!b)return alert('開始と終了時刻を入力してください');dayData().sleep.push({id:uid(),type:$('sleepManualType').value,start:a,end:b});$('sleepManualStart').value='';$('sleepManualEnd').value='';save();render()};
-$('addOutingManual').onclick=()=>{const a=$('outingStart').value,b=$('outingEnd').value;if(!a||!b)return alert('出発と到着時刻を入力してください');dayData().outings.push({id:uid(),start:a,end:b});$('outingStart').value='';$('outingEnd').value='';save();render()};
+$('addOutingManual').onclick=()=>{const a=$('outingStart').value,b=$('outingEnd').value;if(!a||!b)return alert('出発と到着時刻を入力してください');const iv=$('outingIntensity').value;dayData().outings.push({id:uid(),start:a,end:b,intensity:iv===''?null:Number(iv),note:$('outingNote').value.trim()});$('outingStart').value='';$('outingEnd').value='';$('outingIntensity').value='3';$('outingNote').value='';save();render()};
 $('fatigueScale').querySelectorAll('button').forEach(b=>b.onclick=()=>{fatigueLevel=+b.dataset.level;$('fatigueScale').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b))});
 $('addFatigue').onclick=()=>{const t=$('fatigueTime').value;if(!t)return alert('時刻を入力してください');dayData().fatigue.push({id:uid(),time:t,level:fatigueLevel,note:$('fatigueNote').value.trim()});$('fatigueNote').value='';save();render()};
 $('dailyMemo').addEventListener('input',()=>{dayData().memo=$('dailyMemo').value;save();const memo=(dayData().memo||'').trim(),memoBtn=$('heroDayMemo');$('heroDayMemoText').textContent=memo||'メモなし';memoBtn.classList.toggle('empty',!memo);$('heroDayMemoHint').textContent=memo?(memoBtn.classList.contains('expanded')?'タップして1行に戻す':'タップして全文を表示'):'';$('memoSaved').textContent='保存しました';clearTimeout(window._m);window._m=setTimeout(()=>$('memoSaved').textContent='',1000)});
-$('heroDayMemo').onclick=()=>{const b=$('heroDayMemo'),memo=(dayData().memo||'').trim();if(!memo)return;const open=!b.classList.contains('expanded');b.classList.toggle('expanded',open);b.setAttribute('aria-expanded',String(open));$('heroDayMemoHint').textContent=open?'タップして1行に戻す':'タップして全文を表示'};$('prevDay').onclick=()=>shiftDay(-1);$('nextDay').onclick=()=>shiftDay(1);$('jumpToday').onclick=()=>{selectedDate=todayISO();fatigueViewDate=selectedDate;calendarCursor=new Date();render()};$('dateButton').onclick=()=>switchView('Record');$('prevMonth').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()-1);renderCalendar();renderMonthStats()};$('nextMonth').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderCalendar();renderMonthStats()};document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+$('heroDayMemo').onclick=()=>{const b=$('heroDayMemo'),memo=(dayData().memo||'').trim();if(!memo)return;const open=!b.classList.contains('expanded');b.classList.toggle('expanded',open);b.setAttribute('aria-expanded',String(open));$('heroDayMemoHint').textContent=open?'タップして1行に戻す':'タップして全文を表示'};$('prevDay').onclick=()=>shiftDay(-1);$('nextDay').onclick=()=>shiftDay(1);$('jumpToday').onclick=()=>{selectedDate=todayISO();fatigueViewDate=selectedDate;calendarCursor=new Date();render()};$('dateButton').onclick=()=>switchView('Record');$('prevMonth').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()-1);renderCalendar();renderMonthStats();renderSleepStartChart()};$('nextMonth').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderCalendar();renderMonthStats();renderSleepStartChart()};document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
 $('exportData').onclick=()=>{
   const payload={app:'RestLog',version:2,exportedAt:new Date().toISOString(),data:db};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),a=document.createElement('a');
