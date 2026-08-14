@@ -377,6 +377,7 @@ button,input,select,textarea{max-width:100%;min-width:0}
     </div></section>
     <section class="section"><div class="section-title"><h2>分析結果</h2><span id="reportRangeLabel"></span></div><div class="card"><div id="reportSummary"></div></div></section>
     <section class="section"><div class="section-title"><h2>睡眠時間と翌朝疲労</h2><span>1点＝1日</span></div><div class="card"><div id="reportScatter"></div></div></section>
+    <section class="section"><div class="section-title"><h2>日ごとの睡眠・疲労推移</h2><span>期間内の変化</span></div><div class="card"><div id="reportDailyTrend"></div></div></section>
     <section class="section"><div class="section-title"><h2>時間帯別の疲労</h2><span>平均疲労度</span></div><div class="card"><div id="reportTimeFatigue"></div></div></section>
     <section class="section"><div class="section-title"><h2>睡眠時間別の翌朝疲労</h2><span>低いほど回復</span></div><div class="card"><div id="reportSleepBins"></div></div></section>
     <section class="section"><div class="section-title"><h2>レポートを書き出す</h2><span>共有・保存</span></div><div class="card"><div class="report-export"><button class="secondary" id="copyReportText" type="button">テキストをコピー</button><button class="primary" id="exportReportWord" type="button">Word（.docx）を書き出す</button><button class="secondary" id="exportReportText" type="button">テキスト（.txt）を書き出す</button><button class="secondary" id="printReport" type="button">印刷・PDF保存</button></div><div class="report-export-status" id="reportExportStatus"></div><p class="report-note">このレポートは自己記録の傾向を整理するためのものです。因果関係や医学的診断を示すものではありません。</p></div></section>
@@ -1222,10 +1223,23 @@ function scatterSvg(points){
   const W=620,H=270,L=46,R=18,T=18,B=38,ph=H-T-B,pw=W-L-R,xmin=Math.max(0,Math.floor(Math.min(...points.map(p=>p.sleepH)))-1),xmax=Math.ceil(Math.max(...points.map(p=>p.sleepH)))+1,x=v=>L+(v-xmin)/(xmax-xmin||1)*pw,y=v=>T+(10-v)/9*ph;let grid='';[1,3,5,7,9,10].forEach(v=>grid+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="#e2e8f0"/><text x="${L-7}" y="${y(v)+3}" text-anchor="end" font-size="9" fill="#64748b">${v}</text>`);for(let v=xmin;v<=xmax;v+=2)grid+=`<text x="${x(v)}" y="${H-12}" text-anchor="middle" font-size="9" fill="#64748b">${v}h</text>`;const dots=points.map(p=>`<circle cx="${x(p.sleepH)}" cy="${y(p.wake)}" r="4" fill="#2563eb" opacity=".78"><title>${p.date} 睡眠 ${p.sleepH.toFixed(1)}h / 翌朝疲労 ${p.wake}/10</title></circle>`).join('');return `<div class="report-chart"><div class="report-chart-head"><strong>睡眠時間 × 翌朝疲労</strong><span>右下に集まるほど「長く寝た翌朝が楽」</span></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="睡眠時間と翌朝疲労の散布図">${grid}${dots}<text x="${W/2}" y="${H-2}" text-anchor="middle" font-size="10" fill="#64748b">主睡眠時間</text></svg></div>`
 }
 function barSvg(rows,title,subtitle){const valid=rows.filter(x=>x.avg!=null);if(!valid.length)return '<div class="fatigue-history-empty">表示できる記録がまだありません。</div>';const W=620,H=250,L=82,R=28,T=18,B=28,pw=W-L-R,barH=Math.min(25,(H-T-B)/rows.length*.55),gap=(H-T-B)/rows.length;let body='';rows.forEach((r,i)=>{const yy=T+i*gap+gap/2,ww=r.avg==null?0:(r.avg/10)*pw;body+=`<text x="${L-7}" y="${yy+4}" text-anchor="end" font-size="10" fill="#64748b">${r.label}</text><rect x="${L}" y="${yy-barH/2}" width="${ww}" height="${barH}" rx="6" fill="#f59e0b" opacity=".85"/>${r.avg!=null?`<text x="${Math.min(W-R-2,L+ww+7)}" y="${yy+4}" font-size="10" fill="#0f172a">${r.avg.toFixed(1)} (${r.count})</text>`:''}`});return `<div class="report-chart"><div class="report-chart-head"><strong>${title}</strong><span>${subtitle}</span></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}">${body}</svg></div>`}
+function dailyTrendSvg(rows){
+  const valid=rows.filter(x=>x.totalSleep>0||x.wake!=null);
+  if(!valid.length)return '<div class="fatigue-history-empty">表示できる記録がまだありません。</div>';
+  const W=620,H=280,L=44,R=42,T=20,B=42,pw=W-L-R,ph=H-T-B;
+  const x=i=>L+(valid.length===1?pw/2:i/(valid.length-1)*pw),ySleep=v=>T+(1-Math.min(12,v)/12)*ph,yFat=v=>T+((10-v)/9)*ph;
+  let grid='';[0,3,6,9,12].forEach(v=>{const yy=ySleep(v);grid+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#e2e8f0"/><text x="${L-7}" y="${yy+3}" text-anchor="end" font-size="9" fill="#64748b">${v}h</text>`});
+  [1,5,10].forEach(v=>grid+=`<text x="${W-R+7}" y="${yFat(v)+3}" font-size="9" fill="#64748b">${v}</text>`);
+  const path=(key,yfn,ok)=>{let d='',open=false;valid.forEach((r,i)=>{if(!ok(r[key])){open=false;return}d+=`${open?'L':'M'}${x(i).toFixed(1)},${yfn(r[key]).toFixed(1)} `;open=true});return d.trim()};
+  const sleepPath=path('totalSleep',ySleep,v=>v>0),wakePath=path('wake',yFat,v=>v!=null);
+  const every=Math.max(1,Math.ceil(valid.length/7));let labels='';valid.forEach((r,i)=>{if(i%every===0||i===valid.length-1)labels+=`<text x="${x(i)}" y="${H-14}" text-anchor="middle" font-size="9" fill="#64748b">${r.date.slice(5).replace('-','/')}</text>`});
+  return `<div class="report-chart"><div class="report-chart-head"><strong>日ごとの睡眠時間と翌朝疲労</strong><span>青：総睡眠時間　赤：起床時疲労</span></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="日ごとの睡眠時間と起床時疲労の推移">${grid}${labels}<path d="${sleepPath}" fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="${wakePath}" fill="none" stroke="#ef4444" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>${valid.map((r,i)=>r.totalSleep>0?`<circle cx="${x(i)}" cy="${ySleep(r.totalSleep)}" r="3" fill="#2563eb"><title>${r.date} 総睡眠 ${r.totalSleep.toFixed(1)}時間</title></circle>`:'').join('')}${valid.map((r,i)=>r.wake!=null?`<circle cx="${x(i)}" cy="${yFat(r.wake)}" r="3" fill="#ef4444"><title>${r.date} 起床時疲労 ${r.wake}/10</title></circle>`:'').join('')}</svg></div>`;
+}
 function renderReport(){
   if(!$('reportSummary'))return;const a=reportAnalysis(),findings=reportFindings(a);$('reportRangeLabel').textContent=`${a.start.replaceAll('-','/')}〜${a.end.replaceAll('-','/')}`;
   $('reportSummary').innerHTML=`<div class="report-summary"><div class="report-kpi"><span>記録のある日</span><strong>${a.recordDays}日</strong></div><div class="report-kpi"><span>平均総睡眠</span><strong>${a.avgSleep==null?'—':a.avgSleep.toFixed(1)+'時間'}</strong></div><div class="report-kpi"><span>平均疲労</span><strong>${a.avgFatigue==null?'—':a.avgFatigue.toFixed(1)+'/10'}</strong></div><div class="report-kpi"><span>平均起床時疲労</span><strong>${a.avgWake==null?'—':a.avgWake.toFixed(1)+'/10'}</strong></div></div><div class="report-findings"><strong>この期間から読み取れる傾向</strong>${findings.map(x=>`<p>・${esc(x)}</p>`).join('')}</div>`;
   $('reportScatter').innerHTML=scatterSvg(a.paired);
+  $('reportDailyTrend').innerHTML=dailyTrendSvg(a.rows);
   $('reportTimeFatigue').innerHTML=barSvg(a.timeBins,'時間帯別の平均疲労','平均疲労 /10（括弧内は記録件数）')+`<table class="report-table"><tr><th>時間帯</th><th>平均疲労</th><th>件数</th></tr>${a.timeBins.map(x=>`<tr><td>${x.label}</td><td>${x.avg==null?'—':x.avg.toFixed(1)}</td><td>${x.count}</td></tr>`).join('')}</table>`;
   $('reportSleepBins').innerHTML=barSvg(a.bins,'睡眠時間別の翌朝疲労','平均起床時疲労 /10')+`<table class="report-table"><tr><th>主睡眠</th><th>翌朝疲労</th><th>日数</th></tr>${a.bins.map(x=>`<tr><td>${x.label}</td><td>${x.avg==null?'—':x.avg.toFixed(1)}</td><td>${x.count}</td></tr>`).join('')}</table>`;
 }
@@ -1237,7 +1251,85 @@ function crc32(bytes){let c=0xffffffff;for(const b of bytes){c^=b;for(let k=0;k<
 function u16(n){return [n&255,(n>>>8)&255]}function u32(n){return [n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]}
 function zipStore(files){const enc=new TextEncoder(),parts=[],central=[];let off=0;files.forEach(f=>{const name=enc.encode(f.name),data=typeof f.data==='string'?enc.encode(f.data):f.data,crc=crc32(data),local=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...name]);parts.push(local,data);central.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off),...name]));off+=local.length+data.length});const csize=central.reduce((n,x)=>n+x.length,0),end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(csize),...u32(off),...u16(0)]);return new Blob([...parts,...central,end],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})}
 function xmlEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function docxReportBlob(){const a=reportAnalysis(),paras=reportText(a).split('\n').map((line,i)=>line?`<w:p><w:r>${i===0?'<w:rPr><w:b/><w:sz w:val="32"/></w:rPr>':''}<w:t xml:space="preserve">${xmlEsc(line)}</w:t></w:r></w:p>`:'<w:p/>').join('');const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${paras}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr></w:body></w:document>`;return zipStore([{name:'[Content_Types].xml',data:'<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'},{name:'_rels/.rels',data:'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'},{name:'word/document.xml',data:doc}])}
+function canvasPngBytes(canvas){
+  const data=canvas.toDataURL('image/png');
+  if(!data||!data.startsWith('data:image/png;base64,'))throw new Error('グラフPNGを生成できませんでした');
+  const raw=atob(data.split(',')[1]),out=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
+  return out;
+}
+function makeReportCanvas(W=1240,H=560){
+  const c=document.createElement('canvas');c.width=W;c.height=H;
+  const ctx=c.getContext('2d');if(!ctx)throw new Error('グラフ描画領域を作成できませんでした');
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);ctx.textBaseline='middle';return {c,ctx,W,H};
+}
+function chartText(ctx,text,x,y,align='left',size=20,color='#475569',weight='400'){
+  ctx.save();ctx.fillStyle=color;ctx.font=`${weight} ${size}px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif`;ctx.textAlign=align;ctx.fillText(String(text),x,y);ctx.restore();
+}
+function chartLine(ctx,x1,y1,x2,y2,color='#e2e8f0',width=2){
+  ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore();
+}
+function reportScatterPng(a){
+  const {c,ctx,W,H}=makeReportCanvas(),pts=a.paired||[],L=105,R=45,T=75,B=85,pw=W-L-R,ph=H-T-B;
+  chartText(ctx,'睡眠時間 × 翌朝疲労',L,35,'left',28,'#0f172a','700');
+  if(!pts.length){chartText(ctx,'表示できる記録がまだありません',W/2,H/2,'center',24);return canvasPngBytes(c)}
+  const xmin=Math.max(0,Math.floor(Math.min(...pts.map(p=>p.sleepH)))-1),xmax=Math.ceil(Math.max(...pts.map(p=>p.sleepH)))+1;
+  const x=v=>L+(v-xmin)/(xmax-xmin||1)*pw,y=v=>T+(10-v)/9*ph;
+  [1,3,5,7,9,10].forEach(v=>{chartLine(ctx,L,y(v),W-R,y(v));chartText(ctx,v,L-18,y(v),'right',18)});
+  for(let v=xmin;v<=xmax;v+=2)chartText(ctx,v+'h',x(v),H-B+32,'center',18);
+  pts.forEach(p=>{ctx.beginPath();ctx.fillStyle='#2563eb';ctx.globalAlpha=.8;ctx.arc(x(p.sleepH),y(p.wake),8,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1});
+  chartText(ctx,'主睡眠時間',W/2,H-24,'center',20);chartText(ctx,'翌朝疲労 /10',28,H/2,'center',18);
+  return canvasPngBytes(c);
+}
+function reportDailyTrendPng(a){
+  const {c,ctx,W,H}=makeReportCanvas(),rows=(a.rows||[]).filter(r=>r.totalSleep>0||r.wake!=null),L=105,R=75,T=80,B=90,pw=W-L-R,ph=H-T-B;
+  chartText(ctx,'日ごとの睡眠時間・起床時疲労',L,35,'left',28,'#0f172a','700');
+  if(!rows.length){chartText(ctx,'表示できる記録がまだありません',W/2,H/2,'center',24);return canvasPngBytes(c)}
+  const maxSleep=Math.max(10,...rows.map(r=>r.totalSleep||0)),x=i=>rows.length===1?L+pw/2:L+i/(rows.length-1)*pw,ySleep=v=>T+(maxSleep-v)/maxSleep*ph,yFat=v=>T+(10-v)/9*ph;
+  [0,2,4,6,8,10].forEach(v=>{const yy=T+(10-v)/10*ph;chartLine(ctx,L,yy,W-R,yy);chartText(ctx,v+'h',L-16,yy,'right',17);chartText(ctx,v,W-R+16,yy,'left',17)});
+  const drawSeries=(key,yfn,color)=>{ctx.save();ctx.strokeStyle=color;ctx.lineWidth=5;ctx.lineJoin='round';ctx.lineCap='round';let open=false;ctx.beginPath();rows.forEach((r,i)=>{const v=r[key];if(v==null||(key==='totalSleep'&&v<=0)){open=false;return}const xx=x(i),yy=yfn(v);if(!open){ctx.moveTo(xx,yy);open=true}else ctx.lineTo(xx,yy)});ctx.stroke();ctx.restore()};
+  drawSeries('totalSleep',ySleep,'#2563eb');drawSeries('wake',yFat,'#ef4444');
+  const step=Math.max(1,Math.ceil(rows.length/8));rows.forEach((r,i)=>{if(i%step===0||i===rows.length-1)chartText(ctx,r.date.slice(5).replace('-','/'),x(i),H-B+34,'center',16)});
+  chartText(ctx,'青：総睡眠時間',L,66,'left',18,'#2563eb','600');chartText(ctx,'赤：起床時疲労',L+210,66,'left',18,'#ef4444','600');
+  return canvasPngBytes(c);
+}
+function reportBarPng(rows,title){
+  const {c,ctx,W,H}=makeReportCanvas(),L=245,R=100,T=80,B=45,pw=W-L-R,gap=(H-T-B)/Math.max(1,rows.length);
+  chartText(ctx,title,L,35,'left',28,'#0f172a','700');
+  if(!rows.some(r=>r.avg!=null)){chartText(ctx,'表示できる記録がまだありません',W/2,H/2,'center',24);return canvasPngBytes(c)}
+  rows.forEach((r,i)=>{const yy=T+i*gap+gap/2;chartText(ctx,r.label,L-20,yy,'right',19);if(r.avg!=null){const ww=(r.avg/10)*pw;ctx.fillStyle='#f59e0b';ctx.fillRect(L,yy-18,ww,36);chartText(ctx,`${r.avg.toFixed(1)} (${r.count})`,Math.min(W-R+8,L+ww+14),yy,'left',18,'#0f172a','600')}});
+  chartText(ctx,'平均疲労 /10（括弧内は件数）',L,H-20,'left',17);
+  return canvasPngBytes(c);
+}
+function buildReportChartImages(a){
+  const defs=[
+    ['睡眠時間と翌朝疲労',()=>reportScatterPng(a)],
+    ['日ごとの睡眠・疲労推移',()=>reportDailyTrendPng(a)],
+    ['時間帯別の平均疲労',()=>reportBarPng(a.timeBins,'時間帯別の平均疲労')],
+    ['睡眠時間別の翌朝疲労',()=>reportBarPng(a.bins,'睡眠時間別の翌朝疲労')]
+  ];
+  const images=[];
+  for(const [title,make] of defs){
+    const bytes=make();
+    if(!bytes||bytes.length<1000)throw new Error(title+'のグラフ生成に失敗しました');
+    images.push({title,bytes});
+  }
+  if(images.length!==4)throw new Error('4個すべてのグラフを生成できませんでした');
+  return images;
+}
+function docxImageParagraph(rId,name,cx,cy,docPrId){return `<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${docPrId}" name="${xmlEsc(name)}"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="0" name="${xmlEsc(name)}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="${rId}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`}
+async function docxReportBlob(){
+  renderReport();
+  const a=reportAnalysis(),textLines=reportText(a).split('\n');
+  const images=buildReportChartImages(a);
+  const paras=textLines.map((line,i)=>line?`<w:p><w:r>${i===0?'<w:rPr><w:b/><w:sz w:val="32"/></w:rPr>':''}<w:t xml:space="preserve">${xmlEsc(line)}</w:t></w:r></w:p>`:'<w:p/>').join('');
+  const chartHeading=images.length?'<w:p><w:r><w:rPr><w:b/><w:sz w:val="26"/></w:rPr><w:t>【グラフ】</w:t></w:r></w:p>':'';
+  let imageXml='';images.forEach((im,i)=>{imageXml+=`<w:p><w:r><w:rPr><w:b/></w:rPr><w:t>${xmlEsc(im.title)}</w:t></w:r></w:p>`+docxImageParagraph(`rId${i+1}`,`chart${i+1}.png`,5486400,Math.round(5486400*280/620),i+1)});
+  const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${paras}${chartHeading}${imageXml}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr></w:body></w:document>`;
+  const rels=images.map((im,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/chart${i+1}.png"/>`).join('');
+  const files=[{name:'[Content_Types].xml',data:'<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'},{name:'_rels/.rels',data:'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'},{name:'word/document.xml',data:doc},{name:'word/_rels/document.xml.rels',data:`<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels}</Relationships>`}];
+  images.forEach((im,i)=>files.push({name:`word/media/chart${i+1}.png`,data:im.bytes}));return zipStore(files)
+}
 
 function renderMemo(){const [a,b]=dateLabel(selectedDate);$('dailyMemo').value=dayData().memo||'';$('memoDateLabel').textContent=`📝 ${a}${b}のメモ`}
 function renderMemoHistory(){
@@ -1298,7 +1390,7 @@ $('reportStart').onchange=()=>{document.querySelectorAll('[data-report-days]').f
 $('reportEnd').onchange=()=>{document.querySelectorAll('[data-report-days]').forEach(x=>x.classList.remove('active'));renderReport()};
 $('copyReportText').onclick=async()=>{const st=$('reportExportStatus');try{await navigator.clipboard.writeText(reportText());st.textContent='レポート本文をコピーしました'}catch(e){st.textContent='コピーできませんでした。テキスト書き出しをご利用ください'}};
 $('exportReportText').onclick=()=>{downloadBlob(new Blob([reportText()],{type:'text/plain;charset=utf-8'}),`restlog-report-${reportRange().start}-${reportRange().end}.txt`);$('reportExportStatus').textContent='テキストレポートを書き出しました'};
-$('exportReportWord').onclick=()=>{downloadBlob(docxReportBlob(),`restlog-report-${reportRange().start}-${reportRange().end}.docx`);$('reportExportStatus').textContent='Wordレポートを書き出しました'};
+$('exportReportWord').onclick=async()=>{const st=$('reportExportStatus');try{st.textContent='4個のグラフを生成してWordレポートを作成中…';const blob=await docxReportBlob();if(!blob||blob.size<1000)throw new Error('Wordファイルを生成できませんでした');downloadBlob(blob,`restlog-report-${reportRange().start}-${reportRange().end}.docx`);st.textContent='4個中4個のグラフを埋め込んだWordレポートを書き出しました'}catch(e){console.error(e);st.textContent='グラフをすべて生成できなかったため、Word出力を中止しました'}};
 $('printReport').onclick=()=>window.print();
 
 $('exportData').onclick=()=>{
