@@ -298,12 +298,34 @@ button,input,select,textarea{max-width:100%;min-width:0}
 @media(max-width:430px){.sleep-start-chart{height:220px}}
 
 
+/* レポート：日付ごとの生活記録一覧 */
+.report-daily-list-card{padding:10px;overflow:hidden}
+.report-daily-list{display:grid;gap:8px}
+.report-daily-row{display:grid;grid-template-columns:86px minmax(0,1fr);gap:10px;padding:11px 10px;border:1px solid var(--line);border-radius:15px;background:var(--surface2)}
+.report-daily-date{min-width:0}
+.report-daily-date strong{display:block;font-size:13px;white-space:nowrap}
+.report-daily-date span{display:block;margin-top:2px;font-size:10px;color:var(--muted);white-space:nowrap}
+.report-daily-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.report-daily-field{min-width:0;padding:7px 8px;border-radius:10px;background:#fff;border:1px solid rgba(226,232,240,.75)}
+.report-daily-field.wide{grid-column:span 2}
+.report-daily-field span{display:block;font-size:9px;color:var(--muted);white-space:nowrap}
+.report-daily-field strong{display:block;margin-top:2px;font-size:11px;line-height:1.4;overflow-wrap:anywhere;word-break:break-word}
+.report-daily-field small{display:block;margin-top:2px;color:var(--muted);font-size:9px;line-height:1.4;overflow-wrap:anywhere;word-break:break-word}
+.report-daily-empty{padding:14px 4px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:520px){
+  .report-daily-row{grid-template-columns:minmax(0,1fr);gap:7px}
+  .report-daily-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .report-daily-field.wide{grid-column:1/-1}
+}
+
 /* 睡眠・疲労レポート */
 .report-controls{display:grid;gap:10px}.report-period{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.report-period button{min-height:42px;border:1px solid var(--line);border-radius:13px;background:var(--surface2);font-size:12px;font-weight:800}.report-period button.active{background:var(--ink);border-color:var(--ink);color:#fff}.report-dates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.report-dates label{display:block;font-size:11px;font-weight:750;color:var(--muted)}.report-dates input{display:block;width:100%;min-height:44px;margin-top:5px;border:1px solid var(--line);border-radius:13px;background:var(--surface2);padding:9px 10px;color:var(--ink)}
 .report-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.report-kpi{padding:12px;border:1px solid var(--line);border-radius:15px;background:var(--surface2);min-width:0}.report-kpi span{display:block;font-size:10px;color:var(--muted)}.report-kpi strong{display:block;margin-top:4px;font-size:17px;overflow-wrap:anywhere}.report-findings{margin-top:12px;padding:12px 13px;border:1px solid #c7d2fe;border-radius:15px;background:#eef2ff}.report-findings strong{display:block;font-size:12px;margin-bottom:6px}.report-findings p{margin:5px 0;font-size:12px;line-height:1.6;color:#334155}.report-chart{margin-top:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface2);padding:10px;overflow:hidden}.report-chart-head{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;margin-bottom:8px}.report-chart-head strong{font-size:13px}.report-chart-head span{font-size:10px;color:var(--muted);text-align:right}.report-chart svg{display:block;width:100%;height:auto;min-height:230px}.report-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px}.report-table th,.report-table td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right}.report-table th:first-child,.report-table td:first-child{text-align:left}.report-table th{color:var(--muted);font-weight:750}.report-export{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.report-export button{min-height:46px;border-radius:14px;font-size:12px;font-weight:850}.report-export .primary{border:0;background:var(--ink);color:#fff}.report-export .secondary{border:1px solid var(--line);background:#fff;color:var(--ink)}.report-export-status{min-height:18px;margin-top:8px;font-size:11px;color:var(--green)}.report-note{margin-top:9px;font-size:10px;line-height:1.55;color:var(--muted)}
 @media print{.bottom{display:none!important}.hero{display:none!important}.view{display:none!important}#viewReport{display:block!important}.app{max-width:none;padding:0}.section{break-inside:avoid}.report-export{display:none!important}}
 @media(max-width:390px){.report-period{grid-template-columns:minmax(0,1fr)}.report-dates{grid-template-columns:minmax(0,1fr)}.report-summary{grid-template-columns:minmax(0,1fr)}.report-export{grid-template-columns:minmax(0,1fr)}}
 
+
+.report-daily-list-output{margin-top:16px}.report-daily-list-output[hidden]{display:none}.report-daily-list-output>.section-title{margin:0 0 10px}
 </style>
 </head>
 <body>
@@ -380,7 +402,7 @@ button,input,select,textarea{max-width:100%;min-width:0}
     <section class="section"><div class="section-title"><h2>日ごとの睡眠・疲労推移</h2><span>期間内の変化</span></div><div class="card"><div id="reportDailyTrend"></div></div></section>
     <section class="section"><div class="section-title"><h2>時間帯別の疲労</h2><span>平均疲労度</span></div><div class="card"><div id="reportTimeFatigue"></div></div></section>
     <section class="section"><div class="section-title"><h2>睡眠時間別の翌朝疲労</h2><span>低いほど回復</span></div><div class="card"><div id="reportSleepBins"></div></div></section>
-    <section class="section"><div class="section-title"><h2>レポートを書き出す</h2><span>共有・保存</span></div><div class="card"><div class="report-export"><button class="secondary" id="copyReportText" type="button">テキストをコピー</button><button class="primary" id="exportReportWord" type="button">Word（.docx）を書き出す</button><button class="secondary" id="exportReportText" type="button">テキスト（.txt）を書き出す</button><button class="secondary" id="printReport" type="button">印刷・PDF保存</button></div><div class="report-export-status" id="reportExportStatus"></div><p class="report-note">このレポートは自己記録の傾向を整理するためのものです。因果関係や医学的診断を示すものではありません。</p></div></section>
+    <section class="section"><div class="section-title"><h2>レポートを書き出す</h2><span>共有・保存</span></div><div class="card"><div class="report-export"><button class="secondary" id="copyReportText" type="button">テキストをコピー</button><button class="primary" id="exportReportWord" type="button">Word（.docx）を書き出す</button><button class="secondary" id="exportReportText" type="button">テキスト（.txt）を書き出す</button><button class="secondary" id="printReport" type="button">印刷・PDF保存</button><button class="secondary" id="outputDailyList" type="button">日々の記録一覧</button></div><div class="report-export-status" id="reportExportStatus"></div><p class="report-note">このレポートは自己記録の傾向を整理するためのものです。因果関係や医学的診断を示すものではありません。</p></div></section>
   </main>
 
   <main id="viewSave" class="view">
@@ -1199,6 +1221,35 @@ function reportRows(start,end){
     return {date,main,sleepH,totalSleep,wake:wake?Number(wake.level):null,bed:bed?Number(bed.level):null,recovery:wake&&bed?Number(wake.level)-Number(bed.level):null,avgFatigue:allFat.length?allFat.reduce((a,b)=>a+b,0)/allFat.length:null,fatigueCount:allFat.length};
   });
 }
+function reportDailyListData(rows){
+  return rows.map(r=>{
+    const d=db.days[r.date]||{},sleep=(d.sleep||[]),naps=sleep.filter(x=>x.type==='nap'),outings=(d.outings||[]),fatigue=(d.fatigue||[]).slice().sort((a,b)=>a.time.localeCompare(b.time));
+    const main=r.main||longestMainSleep(r.date);
+    const napText=naps.length?naps.map(x=>`${x.start}〜${x.end}`).join(' / '):'—';
+    const outingText=outings.length?outings.map(x=>`${x.start}〜${x.end}${x.note?'：'+x.note:''}`).join(' / '):'—';
+    const fatigueText=fatigue.length?`${(fatigue.reduce((n,x)=>n+Number(x.level||0),0)/fatigue.length).toFixed(1)}/10`:'—';
+    const fatigueDetail=fatigue.length?fatigue.map(x=>`${x.time} ${x.level}`).join(' / '):'';
+    return {date:r.date,wake:main?main.end:'—',bed:main?main.start:'—',sleep:r.sleepH!=null?fmt(mins(main.start,main.end)):'—',nap:napText,outings:outingText,fatigue:fatigueText,fatigueDetail};
+  });
+}
+function reportDailyListHtml(rows){
+  const data=reportDailyListData(rows);
+  if(!data.length)return '<div class="report-daily-empty">表示できる日付がありません。</div>';
+  return `<div class="report-daily-list">${data.map(r=>{
+    const [md,wd]=dateLabel(r.date);
+    return `<div class="report-daily-row">
+      <div class="report-daily-date"><strong>${r.date.replaceAll('-','/')}</strong><span>${md}${wd}</span></div>
+      <div class="report-daily-fields">
+        <div class="report-daily-field"><span>起床時間</span><strong>${r.wake}</strong></div>
+        <div class="report-daily-field"><span>就寝時間</span><strong>${r.bed}</strong></div>
+        <div class="report-daily-field"><span>睡眠時間</span><strong>${r.sleep}</strong></div>
+        <div class="report-daily-field"><span>昼寝</span><strong>${r.nap}</strong></div>
+        <div class="report-daily-field wide"><span>外出（時間・内容）</span><strong>${esc(r.outings)}</strong></div>
+        <div class="report-daily-field"><span>疲労度</span><strong>${r.fatigue}</strong>${r.fatigueDetail?`<small>${esc(r.fatigueDetail)}</small>`:''}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
 function pearson(points){if(points.length<3)return null;const mx=points.reduce((n,p)=>n+p.x,0)/points.length,my=points.reduce((n,p)=>n+p.y,0)/points.length;let a=0,b=0,c=0;points.forEach(p=>{const dx=p.x-mx,dy=p.y-my;a+=dx*dy;b+=dx*dx;c+=dy*dy});return b&&c?a/Math.sqrt(b*c):null}
 function reportTimeBins(start,end){
   const pts=[];datesBetween(start,end).forEach(date=>{const d=db.days[date]||{};(d.fatigue||[]).forEach(x=>pts.push({h:Number(x.time.slice(0,2)),level:Number(x.level)}))});
@@ -1238,13 +1289,14 @@ function dailyTrendSvg(rows){
 function renderReport(){
   if(!$('reportSummary'))return;const a=reportAnalysis(),findings=reportFindings(a);$('reportRangeLabel').textContent=`${a.start.replaceAll('-','/')}〜${a.end.replaceAll('-','/')}`;
   $('reportSummary').innerHTML=`<div class="report-summary"><div class="report-kpi"><span>記録のある日</span><strong>${a.recordDays}日</strong></div><div class="report-kpi"><span>平均総睡眠</span><strong>${a.avgSleep==null?'—':a.avgSleep.toFixed(1)+'時間'}</strong></div><div class="report-kpi"><span>平均疲労</span><strong>${a.avgFatigue==null?'—':a.avgFatigue.toFixed(1)+'/10'}</strong></div><div class="report-kpi"><span>平均起床時疲労</span><strong>${a.avgWake==null?'—':a.avgWake.toFixed(1)+'/10'}</strong></div></div><div class="report-findings"><strong>この期間から読み取れる傾向</strong>${findings.map(x=>`<p>・${esc(x)}</p>`).join('')}</div>`;
+  if($('reportDailyList'))$('reportDailyList').innerHTML=reportDailyListHtml(a.rows);
   $('reportScatter').innerHTML=scatterSvg(a.paired);
   $('reportDailyTrend').innerHTML=dailyTrendSvg(a.rows);
   $('reportTimeFatigue').innerHTML=barSvg(a.timeBins,'時間帯別の平均疲労','平均疲労 /10（括弧内は記録件数）')+`<table class="report-table"><tr><th>時間帯</th><th>平均疲労</th><th>件数</th></tr>${a.timeBins.map(x=>`<tr><td>${x.label}</td><td>${x.avg==null?'—':x.avg.toFixed(1)}</td><td>${x.count}</td></tr>`).join('')}</table>`;
   $('reportSleepBins').innerHTML=barSvg(a.bins,'睡眠時間別の翌朝疲労','平均起床時疲労 /10')+`<table class="report-table"><tr><th>主睡眠</th><th>翌朝疲労</th><th>日数</th></tr>${a.bins.map(x=>`<tr><td>${x.label}</td><td>${x.avg==null?'—':x.avg.toFixed(1)}</td><td>${x.count}</td></tr>`).join('')}</table>`;
 }
 function reportText(a=reportAnalysis()){
-  const lines=['RestLog 睡眠・疲労レポート',`集計期間：${a.start} 〜 ${a.end}`,`作成日：${todayISO()}`,'', '【概要】',`記録のある日：${a.recordDays}日`,`平均総睡眠：${a.avgSleep==null?'—':a.avgSleep.toFixed(1)+'時間'}`,`平均疲労：${a.avgFatigue==null?'—':a.avgFatigue.toFixed(1)+'/10'}`,`平均起床時疲労：${a.avgWake==null?'—':a.avgWake.toFixed(1)+'/10'}`,`就寝→起床の平均変化：${a.avgRecovery==null?'—':(a.avgRecovery>0?'+':'')+a.avgRecovery.toFixed(1)+'/10'}`,'','【主な傾向】',...reportFindings(a).map(x=>'・'+x),'','【睡眠時間別の翌朝疲労】',...a.bins.map(x=>`${x.label}：${x.avg==null?'—':x.avg.toFixed(1)+'/10'}（${x.count}日）`),'','【時間帯別の平均疲労】',...a.timeBins.map(x=>`${x.label}：${x.avg==null?'—':x.avg.toFixed(1)+'/10'}（${x.count}件）`),'','※自己記録の傾向を整理したもので、因果関係や医学的診断を示すものではありません。'];return lines.join('\n')
+  const lines=['RestLog 睡眠・疲労レポート',`集計期間：${a.start} 〜 ${a.end}`,`作成日：${todayISO()}`,'', '【概要】',`記録のある日：${a.recordDays}日`,`平均総睡眠：${a.avgSleep==null?'—':a.avgSleep.toFixed(1)+'時間'}`,`平均疲労：${a.avgFatigue==null?'—':a.avgFatigue.toFixed(1)+'/10'}`,`平均起床時疲労：${a.avgWake==null?'—':a.avgWake.toFixed(1)+'/10'}`,`就寝→起床の平均変化：${a.avgRecovery==null?'—':(a.avgRecovery>0?'+':'')+a.avgRecovery.toFixed(1)+'/10'}`,'','【主な傾向】',...reportFindings(a).map(x=>'・'+x),'','【睡眠時間別の翌朝疲労】',...a.bins.map(x=>`${x.label}：${x.avg==null?'—':x.avg.toFixed(1)+'/10'}（${x.count}日）`),'','【時間帯別の平均疲労】',...a.timeBins.map(x=>`${x.label}：${x.avg==null?'—':x.avg.toFixed(1)+'/10'}（${x.count}件）`),'','【日付ごとの生活記録一覧】',...reportDailyListData(a.rows).flatMap(r=>[`${r.date}：起床 ${r.wake} ／ 就寝 ${r.bed} ／ 睡眠 ${r.sleep} ／ 昼寝 ${r.nap}`,`外出：${r.outings}`,`疲労度：${r.fatigue}${r.fatigueDetail?'（時刻別：'+r.fatigueDetail+'）':''}`]),'','※自己記録の傾向を整理したもので、因果関係や医学的診断を示すものではありません。'];return lines.join('\n')
 }
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function crc32(bytes){let c=0xffffffff;for(const b of bytes){c^=b;for(let k=0;k<8;k++)c=(c>>>1)^((c&1)?0xedb88320:0)}return (c^0xffffffff)>>>0}
@@ -1392,6 +1444,29 @@ $('copyReportText').onclick=async()=>{const st=$('reportExportStatus');try{await
 $('exportReportText').onclick=()=>{downloadBlob(new Blob([reportText()],{type:'text/plain;charset=utf-8'}),`restlog-report-${reportRange().start}-${reportRange().end}.txt`);$('reportExportStatus').textContent='テキストレポートを書き出しました'};
 $('exportReportWord').onclick=async()=>{const st=$('reportExportStatus');try{st.textContent='4個のグラフを生成してWordレポートを作成中…';const blob=await docxReportBlob();if(!blob||blob.size<1000)throw new Error('Wordファイルを生成できませんでした');downloadBlob(blob,`restlog-report-${reportRange().start}-${reportRange().end}.docx`);st.textContent='4個中4個のグラフを埋め込んだWordレポートを書き出しました'}catch(e){console.error(e);st.textContent='グラフをすべて生成できなかったため、Word出力を中止しました'}};
 $('printReport').onclick=()=>window.print();
+$('outputDailyList').onclick=()=>{
+  const a=reportAnalysis();
+  const data=reportDailyListData(a.rows);
+  const lines=[
+    'RestLog 日々の記録一覧',
+    `集計期間：${a.start} 〜 ${a.end}`,
+    `作成日：${todayISO()}`,
+    '',
+    ...data.flatMap(r=>[
+      `【${r.date}】`,
+      `起床時間：${r.wake}`,
+      `就寝時間：${r.bed}`,
+      `睡眠時間：${r.sleep}`,
+      `昼寝：${r.nap}`,
+      `外出：${r.outings}`,
+      `疲労度：${r.fatigue}${r.fatigueDetail?'（時刻別：'+r.fatigueDetail+'）':''}`,
+      ''
+    ])
+  ];
+  const text=lines.join('\n');
+  downloadBlob(new Blob([text],{type:'text/plain;charset=utf-8'}),`restlog-daily-records-${a.start}-${a.end}.txt`);
+  $('reportExportStatus').textContent='日々の記録一覧をテキストで書き出しました';
+};
 
 $('exportData').onclick=()=>{
   const payload={app:'RestLog',version:2,exportedAt:new Date().toISOString(),data:db};
